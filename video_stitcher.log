@@ -28947,3 +28947,18 @@ KeyError: 'SIFT'
 2024-09-28 05:45:40,384:ERROR:No frames to stitch or stitcher not initialized.
 2024-09-28 05:45:40,451:ERROR:No frames to stitch or stitcher not initialized.
 2024-09-28 05:45:40,488:ERROR:No frames to stitch or stitcher not initialized.
+2024-09-30 22:25:24,734:ERROR:Failed to open camera 0
+2024-09-30 22:25:24,734:ERROR:Failed to open camera 1
+2024-09-30 22:25:24,734:ERROR:Failed to open camera 1
+2024-09-30 22:25:24,735:ERROR:Failed to open camera 2
+2024-09-30 22:25:24,735:ERROR:Failed to open camera 2
+2024-09-30 22:25:44,405:ERROR:Error during application close.
+Traceback (most recent call last):
+  File "/home/athena/Documents/GitHub/Cam-Dev/main_window.py", line 83, in closeEvent
+    if canvas.capture and canvas.capture.isOpened():
+AttributeError: 'SingleCameraCanvas' object has no attribute 'capture'
+2024-09-30 22:32:44,818:ERROR:Failed to open dummy video.
+2024-09-30 22:32:54,680:ERROR:Failed to open dummy video.
+2024-09-30 22:32:58,017:ERROR:Failed to open dummy video.
+2024-09-30 22:33:18,481:ERROR:Failed to open dummy video.
+2024-09-30 22:33:23,176:ERROR:Failed to open dummy video.
