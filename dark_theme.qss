@@ -1,0 +1,131 @@
+/* dark_theme.qss */
+
+/* General styles */
+QWidget {
+    background-color: #2d2d30;
+    color: #d4d4d4;
+    font-family: 'Roboto';
+    font-size: 10pt;
+}
+
+/* QPushButton styles */
+QPushButton {
+    background-color: #3e3e42;
+    border: 1px solid #555555;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: #505055;
+}
+
+QPushButton:pressed {
+    background-color: #28282c;
+}
+
+/* QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox styles */
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit {
+    background-color: #3e3e42;
+    color: #d4d4d4;
+    border: 1px solid #555555;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #3e3e42;
+    border: 1px solid #555555;
+    selection-background-color: #505055;
+    selection-color: #d4d4d4;
+}
+
+QComboBox::down-arrow {
+    image: url('icons/down_arrow.png'); /* Provide your own arrow icon */
+}
+
+/* QCheckBox styles */
+QCheckBox {
+    color: #d4d4d4;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: #444;  /* Temporarily using a solid color for testing */
+}
+
+QCheckBox::indicator:checked {
+    background-color: #888;  /* Temporarily using a solid color for testing */
+}
+
+/* QLabel styles */
+QLabel {
+    color: #d4d4d4;
+}
+
+/* QMenuBar and QMenu styles */
+QMenuBar {
+    background-color: #2d2d30;
+}
+
+QMenuBar::item {
+    background-color: #2d2d30;
+    color: #d4d4d4;
+}
+
+QMenuBar::item::selected {
+    background-color: #505055;
+}
+
+QMenu {
+    background-color: #2d2d30;
+    color: #d4d4d4;
+}
+
+QMenu::item::selected {
+    background-color: #505055;
+}
+
+/* QDockWidget styles */
+QDockWidget {
+    titlebar-close-icon: url('icons/close.png'); /* Provide your own icon */
+    titlebar-normal-icon: url('icons/undock.png'); /* Provide your own icon */
+}
+
+QDockWidget::title {
+    background-color: #3e3e42;
+    text-align: center;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/* QScrollBar styles */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background-color: #2d2d30;
+    width: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle {
+    background-color: #555555;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:hover {
+    background-color: #666666;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    background: none;
+}
+
+/* Tooltip styles */
+QToolTip {
+    background-color: #2d2d30;
+    color: #d4d4d4;
+    border: 1px solid #555555;
+}
