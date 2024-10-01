@@ -8,7 +8,6 @@ from video_display_widget import VideoDisplayWidget
 from stitching_settings_panel import StitchingSettingsPanel
 from stitched_video_viewer import StitchedVideoViewer
 from controller import MainController
-from camera_manager import CameraManager
 import logging
 
 class MainWindow(QMainWindow):
@@ -80,8 +79,6 @@ class MainWindow(QMainWindow):
             # Ensure that the stitcher thread is stopped
             if self.controller.stitcher and self.controller.stitcher.isRunning():
                 self.controller.stitcher.stop()
-            # Release all camera captures via CameraManager
-            CameraManager().release_all()
             logging.info("Application closed gracefully.")
             event.accept()
         except Exception as e:
