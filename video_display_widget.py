@@ -1,23 +1,28 @@
 # video_display_widget.py
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QMessageBox
-from single_camera_canvas import SingleCameraCanvas
-from video_sync_manager import VideoSyncManager
-import logging
+
+from PyQt5.QtWidgets import QWidget, QGridLayout, QMessageBox
 from PyQt5.QtCore import Qt
 import cv2
+import logging
+
+from single_camera_canvas import SingleCameraCanvas
+from video_sync_manager import VideoSyncManager
 
 class VideoDisplayWidget(QWidget):
     def __init__(self, num_cameras):
         super().__init__()
         self.num_cameras = num_cameras
         self.all_cameras = self.detect_available_cameras()
-        self.changing_cameras = False
+        if len(self.all_cameras) < num_cameras:
+            QMessageBox.critical(self, "Error", "Not enough cameras available.")
+            self.close()
+            return
         self.init_ui()
 
     def detect_available_cameras(self, max_cameras=10):
         available_cameras = []
         for i in range(max_cameras):
-            cap = cv2.VideoCapture(i)
+            cap = cv2.VideoCapture(i, cv2.CAP_V4L2)
             if cap.isOpened():
                 available_cameras.append(str(i))
                 cap.release()
@@ -31,11 +36,9 @@ class VideoDisplayWidget(QWidget):
         self.cameras = []
         try:
             grid_columns = 3  # Adjust as needed
-            grid_rows = (self.num_cameras + grid_columns - 1) // grid_columns
-
             for idx in range(self.num_cameras):
                 camera_canvas = SingleCameraCanvas(
-                    camera_index=idx,
+                    camera_index=idx % len(self.all_cameras),
                     canvas_index=idx,
                     all_cameras=self.all_cameras,
                 )
@@ -45,38 +48,19 @@ class VideoDisplayWidget(QWidget):
                 self.layout.addWidget(camera_canvas, row, col)
                 self.cameras.append(camera_canvas)
 
-            self.change_cameras_button = QPushButton("Change Cameras")
-            self.change_cameras_button.clicked.connect(self.on_change_cameras)
-            self.layout.addWidget(
-                self.change_cameras_button, grid_rows, 0, 1, grid_columns, alignment=Qt.AlignCenter
-            )
-
             self.setLayout(self.layout)
             self.sync_manager = VideoSyncManager(self.cameras)
+            self.update_dropdown_options()
         except Exception as e:
             logging.error("Error initializing VideoDisplayWidget.", exc_info=True)
             QMessageBox.critical(self, "Error", f"Failed to initialize video display: {str(e)}")
 
-    def on_change_cameras(self):
-        if not self.changing_cameras:
-            # Start changing cameras
-            self.changing_cameras = True
-            self.change_cameras_button.setText("Set Cameras")
-            for canvas in self.cameras:
-                canvas.release_camera()
-                canvas.enable_dropdown()
-            self.update_dropdown_options()
-        else:
-            # Finish changing cameras
-            self.changing_cameras = False
-            self.change_cameras_button.setText("Change Cameras")
-            for canvas in self.cameras:
-                canvas.disable_dropdown()
-                canvas.change_camera()
-
     def on_camera_selection_changed(self, canvas_index, selected_camera):
-        if self.changing_cameras:
-            self.update_dropdown_options()
+        # Release the old camera and open the new one
+        self.cameras[canvas_index].release_camera()
+        self.cameras[canvas_index].change_camera()
+        # Update dropdown options in all canvases
+        self.update_dropdown_options()
 
     def update_dropdown_options(self):
         all_cameras = self.all_cameras
@@ -91,11 +75,5 @@ class VideoDisplayWidget(QWidget):
                 if camera not in selected_cameras or camera == previous_selection
             ]
             canvas.camera_dropdown.addItems(available_cameras)
-            if previous_selection in available_cameras:
-                canvas.camera_dropdown.setCurrentText(previous_selection)
-            else:
-                if available_cameras:
-                    canvas.camera_dropdown.setCurrentIndex(0)
-                else:
-                    canvas.camera_dropdown.setCurrentText("")
+            canvas.camera_dropdown.setCurrentText(previous_selection)
             canvas.camera_dropdown.blockSignals(False)

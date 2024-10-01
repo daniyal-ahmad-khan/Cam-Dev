@@ -1,12 +1,13 @@
 # single_camera_canvas.py
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QLabel, QMessageBox
-import cv2
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import pyqtSignal, Qt
+import cv2
 import logging
 
 class SingleCameraCanvas(QWidget):
-    camera_selection_changed = pyqtSignal(int, str)  # args: canvas index, selected camera
+    camera_selection_changed = pyqtSignal(int, str)  # Arguments: canvas index, selected camera
 
     def __init__(self, camera_index=0, canvas_index=0, all_cameras=[]):
         super().__init__()
@@ -23,8 +24,10 @@ class SingleCameraCanvas(QWidget):
         self.camera_dropdown.setFixedWidth(200)
         self.populate_cameras()
         self.camera_dropdown.currentIndexChanged.connect(self.on_camera_selection_changed)
+
         self.video_label = QLabel()
         self.video_label.setFixedSize(640, 480)
+
         self.layout.addWidget(self.camera_dropdown, alignment=Qt.AlignHCenter)
         self.layout.addWidget(self.video_label)
         self.setLayout(self.layout)
@@ -38,13 +41,8 @@ class SingleCameraCanvas(QWidget):
 
     def on_camera_selection_changed(self):
         selected_camera = self.camera_dropdown.currentText()
+        self.change_camera()
         self.camera_selection_changed.emit(self.canvas_index, selected_camera)
-
-    def enable_dropdown(self):
-        self.camera_dropdown.setEnabled(True)
-
-    def disable_dropdown(self):
-        self.camera_dropdown.setEnabled(False)
 
     def release_camera(self):
         if self.capture:
