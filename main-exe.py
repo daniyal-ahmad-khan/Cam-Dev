@@ -1,5 +1,5 @@
-# main.py
 import sys
+import os
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt
@@ -37,8 +37,17 @@ def excepthook(exc_type, exc_value, exc_tb):
         return
     logging.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_tb))
     QMessageBox.critical(None, "Critical Error",
-                         f"An unexpected error occurred:\n{exc_value}\n\nSee 'video_stitcher.log' for more details.")
+                         f"An un-expected error occurred:\n{exc_value}\n\nSee 'video_stitcher.log' for more details.")
     sys.exit(1)
+
+def get_qss_file_path():
+    """Helper function to get the correct path for dark_theme.qss."""
+    if hasattr(sys, '_MEIPASS'):
+        # If the program is running from a PyInstaller bundle, use _MEIPASS
+        return os.path.join(sys._MEIPASS, 'dark_theme.qss')
+    else:
+        # If running in a normal environment, use the current directory
+        return os.path.join(os.path.dirname(__file__), 'dark_theme.qss')
 
 def main():
     # Set the global exception handler
@@ -50,8 +59,13 @@ def main():
     apply_dark_theme(app)
 
     # Apply a global style sheet
-    with open('dark_theme.qss', 'r') as f:
-        app.setStyleSheet(f.read())
+    qss_file_path = get_qss_file_path()
+    try:
+        with open(qss_file_path, 'r') as f:
+            app.setStyleSheet(f.read())
+    except FileNotFoundError:
+        logging.critical(f"Could not find the QSS file at {qss_file_path}", exc_info=True)
+        QMessageBox.critical(None, "File Not Found", "The required theme file 'dark_theme.qss' was not found.")
 
     main_window = MainWindow()
     main_window.show()
