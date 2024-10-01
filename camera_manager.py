@@ -4,40 +4,36 @@ import cv2
 import logging
 import threading
 
-class CameraWorker(QThread):
-    frame_captured = pyqtSignal(int, object)  # camera_index, frame
-
+class CameraWorker:
     def __init__(self, camera_index):
-        super().__init__()
         self.camera_index = camera_index
         self.capture = None
-        self.running = False
 
-    def run(self):
+    def frames(self):
+        """A generator that yields camera frames."""
         try:
             self.capture = cv2.VideoCapture(self.camera_index)
             if not self.capture.isOpened():
                 logging.warning(f"Failed to open camera {self.camera_index}.")
-                return
+                yield None
 
-            self.running = True
-            while self.running:
+            while True:
                 ret, frame = self.capture.read()
-                if ret:
-                    self.frame_captured.emit(self.camera_index, frame)
-                else:
+                if not ret:
                     logging.warning(f"Camera {self.camera_index} failed to read frame. Reinitializing.")
                     self.capture.release()
                     self.capture = cv2.VideoCapture(self.camera_index)
+                    continue
+                yield frame
         except Exception as e:
             logging.error(f"Error in CameraWorker for camera {self.camera_index}: {e}", exc_info=True)
         finally:
             if self.capture and self.capture.isOpened():
                 self.capture.release()
 
-    def stop(self):
-        self.running = False
-        self.wait()
+    def __del__(self):
+        if self.capture and self.capture.isOpened():
+            self.capture.release()
 
 
 class CameraManager(QObject):
