@@ -56,12 +56,12 @@ class SingleCameraCanvas(QWidget):
             camera_device_index = self.camera_dropdown.currentText()
             if self.capture:
                 self.capture.release()
-            # Attempt to convert to integer for camera indices, fallback to file path
-            try:
-                device_index = int(camera_device_index)
-                self.capture = cv2.VideoCapture(device_index)
-            except ValueError:
-                self.capture = cv2.VideoCapture(camera_device_index)
+            # Convert to integer index
+            device_index = int(camera_device_index)
+            # Specify the backend (e.g., CAP_V4L2 for Linux)
+            self.capture = cv2.VideoCapture(device_index, cv2.CAP_V4L2)
+            if not self.capture.isOpened():
+                raise ValueError(f"Cannot open camera {camera_device_index}")
         except Exception as e:
             logging.error("Error changing camera.", exc_info=True)
             QMessageBox.critical(self, "Error", f"Failed to change camera: {str(e)}")
@@ -77,7 +77,7 @@ class SingleCameraCanvas(QWidget):
                     )
                     self.video_label.setPixmap(QPixmap.fromImage(image))
                 else:
-                    self.capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    pass  # Do nothing if frame read fails
             else:
                 pass  # Keep the last frame displayed
         except Exception as e:

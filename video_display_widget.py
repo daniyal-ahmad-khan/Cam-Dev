@@ -1,17 +1,30 @@
 # video_display_widget.py
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QMessageBox
 from single_camera_canvas import SingleCameraCanvas
 from video_sync_manager import VideoSyncManager
 import logging
 from PyQt5.QtCore import Qt
+import cv2
 
 class VideoDisplayWidget(QWidget):
     def __init__(self, num_cameras):
         super().__init__()
         self.num_cameras = num_cameras
-        self.all_cameras = ["0", "1", "2", "3", "4", "5"]  # Update as needed
+        self.all_cameras = self.detect_available_cameras()
         self.changing_cameras = False
         self.init_ui()
+
+    def detect_available_cameras(self, max_cameras=10):
+        available_cameras = []
+        for i in range(max_cameras):
+            cap = cv2.VideoCapture(i)
+            if cap.isOpened():
+                available_cameras.append(str(i))
+                cap.release()
+        if not available_cameras:
+            QMessageBox.critical(self, "Error", "No cameras found.")
+            self.close()
+        return available_cameras
 
     def init_ui(self):
         self.layout = QGridLayout()
@@ -42,6 +55,7 @@ class VideoDisplayWidget(QWidget):
             self.sync_manager = VideoSyncManager(self.cameras)
         except Exception as e:
             logging.error("Error initializing VideoDisplayWidget.", exc_info=True)
+            QMessageBox.critical(self, "Error", f"Failed to initialize video display: {str(e)}")
 
     def on_change_cameras(self):
         if not self.changing_cameras:
