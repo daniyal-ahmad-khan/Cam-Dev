@@ -4,36 +4,40 @@ import cv2
 import logging
 import threading
 
-class CameraWorker:
+class CameraWorker(QThread):
+    frame_captured = pyqtSignal(int, object)  # camera_index, frame
+
     def __init__(self, camera_index):
+        super().__init__()
         self.camera_index = camera_index
         self.capture = None
+        self.running = False
 
-    def frames(self):
-        """A generator that yields camera frames."""
+    def run(self):
         try:
             self.capture = cv2.VideoCapture(self.camera_index)
             if not self.capture.isOpened():
                 logging.warning(f"Failed to open camera {self.camera_index}.")
-                yield None
+                return
 
-            while True:
+            self.running = True
+            while self.running:
                 ret, frame = self.capture.read()
-                if not ret:
+                if ret:
+                    self.frame_captured.emit(self.camera_index, frame)
+                else:
                     logging.warning(f"Camera {self.camera_index} failed to read frame. Reinitializing.")
                     self.capture.release()
                     self.capture = cv2.VideoCapture(self.camera_index)
-                    continue
-                yield frame
         except Exception as e:
             logging.error(f"Error in CameraWorker for camera {self.camera_index}: {e}", exc_info=True)
         finally:
             if self.capture and self.capture.isOpened():
                 self.capture.release()
 
-    def __del__(self):
-        if self.capture and self.capture.isOpened():
-            self.capture.release()
+    def stop(self):
+        self.running = False
+        self.wait()
 
 
 class CameraManager(QObject):
@@ -58,7 +62,7 @@ class CameraManager(QObject):
         self.init_cameras()
         self._initialized = True
 
-
+        
     def find_available_cameras(max_index=10):
         # List to hold the indices of available cameras
         available_cameras = []
@@ -80,7 +84,7 @@ class CameraManager(QObject):
     
     def init_cameras(self):
         # Initialize workers for desired camera indices
-        camera_indices = self.find_available_cameras(max_index=35)  # Update as needed
+        camera_indices = [0, 2, 4]  # Update as needed
         for idx in camera_indices:
             self.add_camera(idx)
 
@@ -91,7 +95,6 @@ class CameraManager(QObject):
         worker = CameraWorker(camera_index)
         worker.frame_captured.connect(self.handle_frame)
         self.workers[camera_index] = worker
-        print("camera_indexes: ", self.worksers.keys())
         worker.start()
         logging.info(f"Started CameraWorker for camera {camera_index}.")
 
