@@ -1,27 +1,26 @@
 # single_camera_canvas.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QLabel, QMessageBox
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt, pyqtSlot
-from camera_manager import CameraManager
-import logging
 import cv2
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import pyqtSignal, QObject, Qt
+import logging
+from camera_manager import CameraManager
+
 class SingleCameraCanvas(QWidget):
     def __init__(self, camera_index=0):
         super().__init__()
-        self.camera_index = camera_index
         self.init_ui()
-        self.camera_manager = CameraManager()
-        self.camera_manager.frame_updated.connect(self.receive_frame)
-        self.setWindowTitle(f"Camera {self.camera_index}")
-        logging.info(f"SingleCameraCanvas initialized for camera {self.camera_index}")
+        self.capture = None
+        self.camera_dropdown.setCurrentIndex(camera_index)
+        self.change_camera()
 
     def init_ui(self):
+        self.camera_manager = CameraManager()
         self.layout = QVBoxLayout()
         self.camera_dropdown = QComboBox()
         self.camera_dropdown.setFixedWidth(200)
-
+        
         self.populate_cameras()
-        self.camera_dropdown.setCurrentText(str(self.camera_index))
         self.camera_dropdown.currentIndexChanged.connect(self.change_camera)
 
         self.video_label = QLabel()
@@ -32,8 +31,8 @@ class SingleCameraCanvas(QWidget):
 
     def populate_cameras(self):
         try:
-            # Assuming camera indices are [0,2,4]
-            camera_list = [str(i) for i in [0, 2, 4]]
+            # camera_list = [f"/dev/video{i}" for i in range(6)]
+            camera_list = ["output0x.mp4", "output1x.mp4", "output2x.mp4"]
             self.camera_dropdown.addItems(camera_list)
         except Exception as e:
             logging.error("Error populating camera list.", exc_info=True)
@@ -41,37 +40,40 @@ class SingleCameraCanvas(QWidget):
 
     def change_camera(self):
         try:
-            selected_index = int(self.camera_dropdown.currentText())
-            if selected_index == self.camera_index:
-                return  # No change
+            camera_device_index = self.camera_dropdown.currentText()
+            # camera_device_index = int(camera_device_index) if camera_device_index.isdigit() else camera_device_index
+            
+            # Attempt to convert to integer for camera indices, fallback to file path
+            try:
+                device_index = int(camera_device_index)
+                self.capture = self.camera_manager.workers.get(device_index)
+            except ValueError:
+                self.capture = self.camera_manager.workers.get(camera_device_index)
 
-            # Disconnect from the current camera
-            logging.info(f"Switching from camera {self.camera_index} to {selected_index}")
-            self.camera_manager.frame_updated.disconnect(self.receive_frame)
-
-            # Update to the new camera
-            self.camera_index = selected_index
-            self.camera_manager = CameraManager()  # Singleton ensures the same manager
-            self.camera_manager.frame_updated.connect(self.receive_frame)
-
-        except ValueError:
-            logging.error("Invalid camera index selected.")
-            QMessageBox.warning(self, "Warning", "Selected camera index is invalid.")
+            # if not self.capture.isOpened():
+            #     logging.warning(f"Failed to open camera/video: {camera_device_index}. Using dummy video as fallback.")
+            #     # Use a dummy video if the camera is unavailable
+            #     # Replace 'dummy_video.mp4' with an actual dummy video path or handle accordingly
+            #     self.capture = cv2.VideoCapture('output0x.mp4')  # Replace with an actual dummy video path
+            #     if not self.capture.isOpened():
+            #         logging.error("Failed to open dummy video.")
+            #         QMessageBox.critical(self, "Error", "Failed to open both the selected camera/video and the dummy video.")
         except Exception as e:
             logging.error("Error changing camera.", exc_info=True)
             QMessageBox.critical(self, "Error", f"Failed to change camera: {str(e)}")
-
-    @pyqtSlot(int, object)
-    def receive_frame(self, camera_index, frame):
-        if camera_index != self.camera_index:
-            return  # Ignore frames from other cameras
-
+    def update_frame(self):
         try:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = QImage(
-                frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888
-            )
-            self.video_label.setPixmap(QPixmap.fromImage(image))
+            if self.capture and self.capture.isOpened():
+                ret, frame = self.capture.read()
+                if ret:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    image = QImage(
+                        frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888
+                    )
+                    self.video_label.setPixmap(QPixmap.fromImage(image))
+                else:
+                    # Restart the dummy video when it ends
+                    self.capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
         except Exception as e:
-            logging.error("Error processing received frame.", exc_info=True)
-            QMessageBox.warning(self, "Warning", f"Failed to process frame: {str(e)}")
+            logging.error("Error updating camera frame.", exc_info=True)
+            QMessageBox.warning(self, "Warning", f"Failed to update camera frame: {str(e)}")
