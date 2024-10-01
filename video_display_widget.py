@@ -80,22 +80,39 @@ class VideoDisplayWidget(QWidget):
 
     def update_dropdown_options(self):
         all_cameras = self.all_cameras
-        selected_cameras = [canvas.camera_dropdown.currentText() for canvas in self.cameras]
-        for canvas in self.cameras:
-            previous_selection = canvas.camera_dropdown.currentText()
-            canvas.camera_dropdown.blockSignals(True)
-            canvas.camera_dropdown.clear()
-            available_cameras = [
-                camera
-                for camera in all_cameras
-                if camera not in selected_cameras or camera == previous_selection
-            ]
-            canvas.camera_dropdown.addItems(available_cameras)
-            if previous_selection in available_cameras:
-                canvas.camera_dropdown.setCurrentText(previous_selection)
-            else:
-                if available_cameras:
-                    canvas.camera_dropdown.setCurrentIndex(0)
+        if self.changing_cameras:
+            # When changing cameras, show all cameras in dropdowns
+            for canvas in self.cameras:
+                previous_selection = canvas.camera_dropdown.currentText()
+                canvas.camera_dropdown.blockSignals(True)
+                canvas.camera_dropdown.clear()
+                canvas.camera_dropdown.addItems(all_cameras)
+                if previous_selection in all_cameras:
+                    canvas.camera_dropdown.setCurrentText(previous_selection)
                 else:
-                    canvas.camera_dropdown.setCurrentText("")
-            canvas.camera_dropdown.blockSignals(False)
+                    if all_cameras:
+                        canvas.camera_dropdown.setCurrentIndex(0)
+                    else:
+                        canvas.camera_dropdown.setCurrentText("")
+                canvas.camera_dropdown.blockSignals(False)
+        else:
+            # When not changing cameras, prevent duplicate selections
+            selected_cameras = [canvas.camera_dropdown.currentText() for canvas in self.cameras]
+            for canvas in self.cameras:
+                previous_selection = canvas.camera_dropdown.currentText()
+                canvas.camera_dropdown.blockSignals(True)
+                canvas.camera_dropdown.clear()
+                available_cameras = [
+                    camera
+                    for camera in all_cameras
+                    if camera not in selected_cameras or camera == previous_selection
+                ]
+                canvas.camera_dropdown.addItems(available_cameras)
+                if previous_selection in available_cameras:
+                    canvas.camera_dropdown.setCurrentText(previous_selection)
+                else:
+                    if available_cameras:
+                        canvas.camera_dropdown.setCurrentIndex(0)
+                    else:
+                        canvas.camera_dropdown.setCurrentText("")
+                canvas.camera_dropdown.blockSignals(False)
