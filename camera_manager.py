@@ -62,9 +62,29 @@ class CameraManager(QObject):
         self.init_cameras()
         self._initialized = True
 
+
+    def find_available_cameras(max_index=10):
+        # List to hold the indices of available cameras
+        available_cameras = []
+
+        # Try to open each camera index from 0 to max_index
+        for index in range(max_index):
+            # Attempt to create a video capture object
+            cap = cv2.VideoCapture(index)
+            if cap.isOpened():
+                # If the camera is available, add the index to the list
+                available_cameras.append(index)
+                # Release the camera device
+                cap.release()
+            else:
+                print(f"Camera at index {index} is not available.")
+
+        return available_cameras
+    
+    
     def init_cameras(self):
         # Initialize workers for desired camera indices
-        camera_indices = [0, 2, 4]  # Update as needed
+        camera_indices = self.find_available_cameras(max_index=30)  # Update as needed
         for idx in camera_indices:
             self.add_camera(idx)
 
