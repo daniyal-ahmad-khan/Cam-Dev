@@ -35,7 +35,7 @@ class SingleCameraCanvas(QWidget):
     def populate_cameras(self):
         try:
             # Populate with available camera indices
-            camera_list = [str(i) for i in self.camera_manager.find_available_cameras(max_index=35)]
+            camera_list = [str(i) for i in [0,2,4]]
             self.camera_dropdown.addItems(camera_list)
         except Exception as e:
             logging.error("Error populating camera list.", exc_info=True)
