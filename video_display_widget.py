@@ -64,14 +64,14 @@ class VideoDisplayWidget(QWidget):
             self.change_cameras_button.setText("Set Cameras")
             for canvas in self.cameras:
                 canvas.release_camera()
-                canvas.enable_dropdown()
+                # canvas.enable_dropdown()
             self.update_dropdown_options()
         else:
             # Finish changing cameras
             self.changing_cameras = False
             self.change_cameras_button.setText("Change Cameras")
             for canvas in self.cameras:
-                canvas.disable_dropdown()
+                # canvas.disable_dropdown()
                 canvas.change_camera()
 
     def on_camera_selection_changed(self, canvas_index, selected_camera):
