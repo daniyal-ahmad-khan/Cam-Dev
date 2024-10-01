@@ -37,7 +37,7 @@ def excepthook(exc_type, exc_value, exc_tb):
         return
     logging.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_tb))
     QMessageBox.critical(None, "Critical Error",
-                         f"An unexpected error occurred:\n{exc_value}\n\nSee 'video_stitcher.log' for more details.")
+                         f"An un-expected error occurred:\n{exc_value}\n\nSee 'video_stitcher.log' for more details.")
     sys.exit(1)
 
 def main():
