@@ -91,6 +91,7 @@ class CameraManager(QObject):
         worker = CameraWorker(camera_index)
         worker.frame_captured.connect(self.handle_frame)
         self.workers[camera_index] = worker
+        print("camera_indexes: ", self.worksers.keys())
         worker.start()
         logging.info(f"Started CameraWorker for camera {camera_index}.")
 
