@@ -84,7 +84,7 @@ class CameraManager(QObject):
     
     def init_cameras(self):
         # Initialize workers for desired camera indices
-        camera_indices = self.find_available_cameras(max_index=30)  # Update as needed
+        camera_indices = self.find_available_cameras(max_index=35)  # Update as needed
         for idx in camera_indices:
             self.add_camera(idx)
 
