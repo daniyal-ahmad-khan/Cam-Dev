@@ -15,7 +15,7 @@ class StitchedVideoViewer(QWidget):
         self.layout = QVBoxLayout()
         self.video_label = QLabel()
         self.video_label.setAlignment(Qt.AlignCenter)
-        self.video_label.setFixedSize(640, 480)
+        # self.video_label.setFixedSize(640, 480)
         self.fullscreen_button = QPushButton("Full Screen")
         self.fullscreen_button.clicked.connect(self.toggle_fullscreen)
         self.layout.addWidget(self.video_label)

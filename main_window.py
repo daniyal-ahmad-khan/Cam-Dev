@@ -14,13 +14,20 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Video Stitcher")
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
+            Qt.WindowCloseButtonHint
+        )
         self.init_ui()
+        
         logging.info("MainWindow initialized")
 
     def init_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-
+        self.setMinimumSize(800, 600)
         # Layouts
         self.layout = QVBoxLayout()
         central_widget.setLayout(self.layout)
@@ -34,6 +41,8 @@ class MainWindow(QMainWindow):
         self.stitching_settings_panel = StitchingSettingsPanel()
         self.stitched_video_viewer = StitchedVideoViewer()
         self.controller = MainController(self)
+
+        # self.stitched_video_viewer.fullscreen_requested.connect(self.handle_fullscreen_request)
 
         # Add stitching settings panel as a dockable widget
         self.settings_dock = QDockWidget("Stitching Settings", self)
