@@ -1,11 +1,13 @@
-# stitched_video_viewer.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 import cv2
 import logging
 
 class StitchedVideoViewer(QWidget):
+    # Define a custom signal
+    fullscreen_requested = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.is_fullscreen = False
@@ -35,11 +37,8 @@ class StitchedVideoViewer(QWidget):
 
     def toggle_fullscreen(self):
         try:
-            if self.is_fullscreen:
-                self.showNormal()
-            else:
-                self.showFullScreen()
-            self.is_fullscreen = not self.is_fullscreen
+            # Emit the custom signal instead of trying to toggle fullscreen here
+            self.fullscreen_requested.emit()
         except Exception as e:
             logging.error("Error toggling fullscreen.", exc_info=True)
             QMessageBox.warning(self, "Warning", f"Failed to toggle fullscreen: {str(e)}")
