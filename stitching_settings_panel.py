@@ -14,9 +14,9 @@ class StitchingSettingsPanel(QWidget):
 
         # Resolution for image registration step
         self.work_megapix = QDoubleSpinBox()
-        self.work_megapix.setRange(0.0, 10.0)
+        self.work_megapix.setRange(-1.0, 10.0)
         self.work_megapix.setSingleStep(0.1)
-        self.work_megapix.setValue(0.6)
+        self.work_megapix.setValue(-1.0)
 
         # Features type
         self.features = QComboBox()

@@ -4,24 +4,34 @@ from PyQt5.QtCore import Qt, pyqtSignal
 import cv2
 import logging
 
+# stitched_video_viewer.py
+
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import Qt, pyqtSignal
+import cv2
+import logging
+
 class StitchedVideoViewer(QWidget):
-    # Define a custom signal
-    fullscreen_requested = pyqtSignal()
+    fullscreen_requested = pyqtSignal()  # Signal to request fullscreen
 
     def __init__(self):
         super().__init__()
-        self.is_fullscreen = False
         self.init_ui()
 
     def init_ui(self):
         self.layout = QVBoxLayout()
+        
+        # Video Display
         self.video_label = QLabel()
         self.video_label.setAlignment(Qt.AlignCenter)
-        # self.video_label.setFixedSize(640, 480)
-        self.fullscreen_button = QPushButton("Full Screen")
-        self.fullscreen_button.clicked.connect(self.toggle_fullscreen)
         self.layout.addWidget(self.video_label)
+        
+        # Fullscreen Button
+        self.fullscreen_button = QPushButton("Full Screen")
+        self.fullscreen_button.clicked.connect(self.fullscreen_requested.emit)
         self.layout.addWidget(self.fullscreen_button)
+        
         self.setLayout(self.layout)
 
     def display_video(self, frame):
@@ -35,10 +45,20 @@ class StitchedVideoViewer(QWidget):
             logging.error("Error displaying stitched video frame.", exc_info=True)
             QMessageBox.warning(self, "Warning", f"Failed to display stitched video: {str(e)}")
 
-    def toggle_fullscreen(self):
-        try:
-            # Emit the custom signal instead of trying to toggle fullscreen here
-            self.fullscreen_requested.emit()
-        except Exception as e:
-            logging.error("Error toggling fullscreen.", exc_info=True)
-            QMessageBox.warning(self, "Warning", f"Failed to toggle fullscreen: {str(e)}")
+    # def toggle_fullscreen(self):
+    #     if not self.is_fullscreen:
+    #         self.original_state = {
+    #             'parent': self.parent(),
+    #             'geometry': self.geometry(),
+    #             'window_flags': self.windowFlags()
+    #         }
+    #         self.setParent(None)
+    #         self.setWindowFlags(Qt.Window)
+    #         self.showFullScreen()
+    #         self.is_fullscreen = True
+    #     else:
+    #         self.setParent(self.original_state['parent'])
+    #         self.setWindowFlags(self.original_state['window_flags'])
+    #         self.setGeometry(self.original_state['geometry'])
+    #         self.showNormal()
+    #         self.is_fullscreen = False

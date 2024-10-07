@@ -26,7 +26,7 @@ class SingleCameraCanvas(QWidget):
         self.camera_dropdown.currentIndexChanged.connect(self.on_camera_selection_changed)
 
         self.video_label = QLabel()
-        self.video_label.setFixedSize(640, 480)
+        # self.video_label.setFixedSize(640, 480)
 
         self.layout.addWidget(self.camera_dropdown, alignment=Qt.AlignHCenter)
         self.layout.addWidget(self.video_label)

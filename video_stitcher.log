@@ -28962,3 +28962,19 @@ AttributeError: 'SingleCameraCanvas' object has no attribute 'capture'
 2024-09-30 22:32:58,017:ERROR:Failed to open dummy video.
 2024-09-30 22:33:18,481:ERROR:Failed to open dummy video.
 2024-09-30 22:33:23,176:ERROR:Failed to open dummy video.
+2024-10-08 01:44:15,045:CRITICAL:Unhandled exception
+Traceback (most recent call last):
+  File "/home/athenaai/Documents/Daniyal/Cam-Dev/main.py", line 67, in <module>
+    main()
+  File "/home/athenaai/Documents/Daniyal/Cam-Dev/main.py", line 56, in main
+    main_window = MainWindow()
+  File "/home/athenaai/Documents/Daniyal/Cam-Dev/main_window.py", line 22, in __init__
+    self.init_ui()
+  File "/home/athenaai/Documents/Daniyal/Cam-Dev/main_window.py", line 45, in init_ui
+    self.stitched_video_viewer.fullscreen_requested.connect(self.handle_fullscreen_request)
+AttributeError: 'StitchedVideoViewer' object has no attribute 'fullscreen_requested'
+2024-10-08 02:12:20,017:CRITICAL:Unhandled exception
+Traceback (most recent call last):
+  File "/home/athenaai/Documents/Daniyal/Cam-Dev/main_window.py", line 99, in open_fullscreen
+    self.controller.connect_fullscreen_viewer(self.fullscreen_viewer)
+AttributeError: 'MainController' object has no attribute 'connect_fullscreen_viewer'

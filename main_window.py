@@ -1,11 +1,15 @@
+# main_window.py
+
 from PyQt5.QtWidgets import (
-    QMainWindow, QVBoxLayout, QWidget, QPushButton, QDockWidget, QAction, QMessageBox
+    QMainWindow, QVBoxLayout, QWidget, QPushButton, QDockWidget,
+    QAction, QMessageBox
 )
 from PyQt5.QtCore import Qt
 from camera_selection_dialog import CameraSelectionDialog
 from video_display_widget import VideoDisplayWidget
 from stitching_settings_panel import StitchingSettingsPanel
 from stitched_video_viewer import StitchedVideoViewer
+from fullscreen_video_window import FullscreenVideoWindow  # Import the new class
 from controller import MainController
 import logging
 
@@ -19,6 +23,8 @@ class MainWindow(QMainWindow):
             Qt.WindowMaximizeButtonHint |
             Qt.WindowCloseButtonHint
         )
+        self.fullscreen_window = None  # Reference to the fullscreen window
+        self.fullscreen_viewer = None
         self.init_ui()
         
         logging.info("MainWindow initialized")
@@ -27,6 +33,7 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         self.setMinimumSize(800, 600)
+        
         # Layouts
         self.layout = QVBoxLayout()
         central_widget.setLayout(self.layout)
@@ -41,8 +48,8 @@ class MainWindow(QMainWindow):
         self.stitched_video_viewer = StitchedVideoViewer()
         self.controller = MainController(self)
 
-        # Connect the fullscreen signal to the handler
-        self.stitched_video_viewer.fullscreen_requested.connect(self.handle_fullscreen_request)
+        # Connect the fullscreen request signal to the handler
+        self.stitched_video_viewer.fullscreen_requested.connect(self.open_fullscreen)
 
         # Add stitching settings panel as a dockable widget
         self.settings_dock = QDockWidget("Stitching Settings", self)
@@ -83,17 +90,32 @@ class MainWindow(QMainWindow):
             logging.error("Error toggling settings drawer.", exc_info=True)
             QMessageBox.warning(self, "Warning", f"Failed to toggle settings drawer: {str(e)}")
 
-    def handle_fullscreen_request(self):
-        try:
-            if self.isFullScreen():
-                self.showNormal()
-                logging.info("Exited fullscreen mode.")
+    def open_fullscreen(self):
+        if not self.fullscreen_window or not self.fullscreen_window.isVisible():
+            logging.info("Opening fullscreen window.")
+            if not self.fullscreen_viewer:
+                self.fullscreen_viewer = StitchedVideoViewer()
+
+            # Ensure connection is active to display videos
+            self.controller.connect_fullscreen_viewer(self.fullscreen_viewer)
+
+            if not self.fullscreen_window:
+                self.fullscreen_window = FullscreenVideoWindow(self.fullscreen_viewer)
+                self.fullscreen_window.destroyed.connect(self.on_fullscreen_closed)
             else:
-                self.showFullScreen()
-                logging.info("Entered fullscreen mode.")
-        except Exception as e:
-            logging.error("Error handling fullscreen request.", exc_info=True)
-            QMessageBox.warning(self, "Warning", f"Failed to toggle fullscreen: {str(e)}")
+                # Reset the central widget to handle any state inconsistencies
+                self.fullscreen_window.setCentralWidget(self.fullscreen_viewer)
+                self.fullscreen_window.showFullScreen()
+        else:
+            logging.warning("Fullscreen window is already open or visible.")
+
+
+    def on_fullscreen_closed(self):
+        logging.info("Fullscreen window closed.")
+        if self.fullscreen_viewer:
+            self.controller.disconnect_fullscreen_viewer(self.fullscreen_viewer)
+            self.fullscreen_viewer = None
+        self.fullscreen_window = None
 
     def closeEvent(self, event):
         try:
