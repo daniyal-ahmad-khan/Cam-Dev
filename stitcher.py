@@ -45,6 +45,10 @@ class VideoStitcher(QThread):
 
     def run(self):
         # while self.is_running:
+        if not self.is_running:
+            return  # Avoid running the loop if the stitcher is stopped 
+        
+        
         try:
             frames = []
             for cap in self.camera_feeds:

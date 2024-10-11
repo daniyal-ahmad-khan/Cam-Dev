@@ -29,8 +29,14 @@ class MainController(QObject):
                 self.stitcher.stop()
                 self.stitcher = None
 
+            if self.timer and self.timer.isActive():
+                self.timer.stop()
+                self.timer = None
+
             # Initialize and start the stitcher thread
             self.stitcher = VideoStitcher(camera_feeds, settings)
+
+            self.clear_viewers()
 
             # Connect the frame_ready signal to update_stitched_video
             self.stitcher.frame_ready.connect(self.update_stitched_video)
@@ -100,3 +106,10 @@ class MainController(QObject):
                 logging.info("Timer stopped.")
         except Exception as e:
             logging.error("Error stopping the stitcher.", exc_info=True)
+
+    def clear_viewers(self):
+        """
+        Clear the video viewers to reset their content.
+        """
+        for viewer in self.viewers:
+            viewer.clear()

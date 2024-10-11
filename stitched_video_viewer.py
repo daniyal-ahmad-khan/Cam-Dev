@@ -45,6 +45,12 @@ class StitchedVideoViewer(QWidget):
             logging.error("Error displaying stitched video frame.", exc_info=True)
             QMessageBox.warning(self, "Warning", f"Failed to display stitched video: {str(e)}")
 
+    def clear(self):
+        """
+        Clears the currently displayed video frame.
+        """
+        self.video_label.clear()
+
     # def toggle_fullscreen(self):
     #     if not self.is_fullscreen:
     #         self.original_state = {
